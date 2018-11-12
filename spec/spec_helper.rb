@@ -1,4 +1,5 @@
 require "bundler/setup"
+require "timecop"
 require "knock_knock"
 
 RSpec.configure do |config|
