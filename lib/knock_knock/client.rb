@@ -15,9 +15,7 @@ module KnockKnock
     def allow?(ip)
       below = counter.put_if_below(ip, max_requests)
 
-      if below
-        evictor.mark(ip, Time.now)
-      end
+      evictor.mark(ip, Time.now) if below
 
       below
     end
