@@ -4,6 +4,17 @@
 - Who's there?
 - 40k requests from a single IP saying hello to your server.
 
+
+## Running an example
+
+After checking out this repository:
+
+```bash
+gem build knock_knock.gemspec
+gem install --local knock_knock-0.1.0.gem
+ruby examples/example.rb
+```
+
 ## Installation
 
 Add this line to your application's Gemfile:
