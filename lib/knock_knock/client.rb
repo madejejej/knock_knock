@@ -1,19 +1,20 @@
 module KnockKnock
   class Client
-    def initialize(
-      counter = KnockKnock.counter,
-      evictor = KnockKnock.evictor
-    )
+    def initialize(counter, evictor)
       @counter = counter
       @evictor = evictor
     end
 
     def allow?(ip)
-      below = counter.put_if_below(ip)
+      if evictor.overloaded?
+        counter.below_limit?(ip)
+      else
+        below = counter.put_if_below_limit(ip)
 
-      evictor.mark(ip, Time.now) if below
+        evictor.mark!(ip, Time.now) if below
 
-      below
+        below
+      end
     end
 
     private

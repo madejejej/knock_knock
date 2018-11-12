@@ -9,7 +9,9 @@ module KnockKnock
         @mutex = Mutex.new
       end
 
-      def put_if_below(ip)
+      # Increments the counter value for a given IP
+      # returns whether ip is below the limit or not
+      def put_if_below_limit(ip)
         # since we will be in a threaded environment, this whole method needs to be synchronized
         # we don't have any mechanisms that are able to execute this logic atomically
         current = mutex.synchronize do
@@ -18,6 +20,26 @@ module KnockKnock
         end
 
         current <= limit
+      end
+
+      def below_limit?(ip)
+        mutex.synchronize do
+          hash[ip] < limit
+        end
+      end
+
+      # Decrements the value of requests for a given IP
+      # Assumes that the given IP is present in the underlying Hash
+      def decrement(ip)
+        mutex.synchronize do
+          new_val = hash[ip] - 1
+
+          if new_val <= 0
+            hash.delete(ip)
+          else
+            hash[ip] -= 1
+          end
+        end
       end
 
       private
