@@ -46,9 +46,13 @@ module KnockKnock
             ip, evict_at = queue.pop
 
             while evict_at > Time.now
-              sleep evict_at - Time.now
+              sleep_for = evict_at - Time.now
+
+              KnockKnock.logger.debug("Sleeping for #{sleep_for}s before evicting IP #{ip}")
+              sleep(sleep_for > 0 ? sleep_for : 0)
             end
 
+            KnockKnock.logger.debug("Evicting IP #{ip}")
             counter.decrement(ip)
           end
         end

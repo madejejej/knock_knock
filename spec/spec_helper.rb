@@ -13,3 +13,7 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
+
+KnockKnock.configure do |config|
+  config.logger = Logger.new($stdout, level: 3)
+end

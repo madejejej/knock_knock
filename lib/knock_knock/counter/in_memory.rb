@@ -16,6 +16,10 @@ module KnockKnock
         # we don't have any mechanisms that are able to execute this logic atomically
         current = mutex.synchronize do
           current = hash[ip].to_i
+
+          # do not increment the counter if we're already over limit
+          return false if current >= limit
+
           hash[ip] = current + 1
         end
 
