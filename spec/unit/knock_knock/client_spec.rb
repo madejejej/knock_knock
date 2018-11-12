@@ -1,10 +1,8 @@
 RSpec.describe KnockKnock::Client do
   let(:counter) { instance_double(KnockKnock::Counter::InMemory) }
   let(:evictor) { instance_double(KnockKnock::Evictor::InMemory) }
-  let(:max_requests) { 10 }
-  let(:time_range) { 60 }
 
-  subject(:client) { described_class.new(counter, evictor, max_requests, time_range) }
+  subject(:client) { described_class.new(counter, evictor) }
 
   describe '#allow?' do
     let(:ip) { '45.82.21.35' }
@@ -14,7 +12,7 @@ RSpec.describe KnockKnock::Client do
 
     context 'when the client didnt exceed the limit' do
       it 'returns true' do
-        expect(counter).to receive(:put_if_below).with(ip, max_requests).and_return true
+        expect(counter).to receive(:put_if_below).with(ip).and_return true
         expect(evictor).to receive(:mark).with(ip, now)
 
         Timecop.freeze(now) do
@@ -25,7 +23,7 @@ RSpec.describe KnockKnock::Client do
 
     context 'when the client exceeded the limit' do
       it 'returns false' do
-        expect(counter).to receive(:put_if_below).with(ip, max_requests).and_return false
+        expect(counter).to receive(:put_if_below).with(ip).and_return false
         expect(evictor).not_to receive(:mark)
 
         expect(subject).to eq false

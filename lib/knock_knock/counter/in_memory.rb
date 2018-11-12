@@ -1,7 +1,7 @@
 module KnockKnock
   module Counter
     class InMemory
-      def put_if_below(ip, max_requests); end
+      def put_if_below(ip); end
     end
   end
 end
