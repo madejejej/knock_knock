@@ -43,19 +43,14 @@ module KnockKnock
       def start_evicting_thread
         Thread.new do
           while true
-            request_metadata = queue.pop
+            request_metadata = queue.try_pop_if_ttl_passed(ttl, Time.now)
 
-            evict_at = [request_metadata.timestamp + ttl, Time.now].max
+            next if request_metadata.nil?
+
             ip = request_metadata.ip
 
-            while evict_at > Time.now
-              sleep_for = evict_at - Time.now
-
-              KnockKnock.logger.debug("Sleeping for #{sleep_for}s before evicting IP #{ip}")
-              sleep(sleep_for > 0 ? sleep_for : 0)
-            end
-
             KnockKnock.logger.debug("Evicting IP #{ip}")
+
             counter.decrement(ip)
           end
         end
