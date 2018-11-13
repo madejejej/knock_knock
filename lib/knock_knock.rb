@@ -3,6 +3,7 @@ require 'dry-configurable'
 require 'knock_knock/client'
 require 'knock_knock/counter/in_memory'
 require 'knock_knock/evictor/in_memory'
+require 'knock_knock/queue/unordered_thread_safe_queue'
 require 'knock_knock/request_metadata'
 require 'knock_knock/version'
 
@@ -25,11 +26,14 @@ module KnockKnock
   # It returns a new instance every time.
   # TODO: configurable Counter and Evictor
   def self.create_client
+    queue = KnockKnock::Queue::UnorderedThreadSafeQueue.new(max_size: config.max_queue_size)
+
     counter = KnockKnock::Counter::InMemory.new(KnockKnock.config.max_requests)
+
     evictor = KnockKnock::Evictor::InMemory.new(
       KnockKnock.config.time_range,
-      KnockKnock.config.max_queue_size,
-      counter
+      counter,
+      queue
     )
 
     KnockKnock::Client.new(counter, evictor)

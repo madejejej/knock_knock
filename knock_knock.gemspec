@@ -31,6 +31,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'dry-configurable', '~> 0.7.0'
+  # Ruby lacks an official priority queue implementation.
+  # Not sure if this is the best choice, but there aren't any alternatives on GH.
+  spec.add_dependency 'PriorityQueue', '~> 0.1.2'
   spec.add_development_dependency 'bundler', '~> 1.16'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.0'

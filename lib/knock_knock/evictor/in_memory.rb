@@ -5,10 +5,10 @@ module KnockKnock
 
       attr_reader :evicting_thread
 
-      def initialize(ttl, max_queue_size, counter)
+      def initialize(ttl, counter, queue)
         @ttl = ttl
         @counter = counter
-        @queue = SizedQueue.new(max_queue_size)
+        @queue = queue
         @evicting_thread = start_evicting_thread
       end
 

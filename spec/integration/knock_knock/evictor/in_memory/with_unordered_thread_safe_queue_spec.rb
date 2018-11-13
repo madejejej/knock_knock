@@ -1,9 +1,9 @@
 RSpec.describe KnockKnock::Evictor::InMemory do
   let(:ttl) { 2 }
-  let(:max_queue_size) { 5 }
   let(:counter) { instance_double(KnockKnock::Counter::InMemory) }
+  let(:queue) { KnockKnock::Queue::UnorderedThreadSafeQueue.new(max_size: 100) }
 
-  subject(:evictor) { described_class.new(ttl, max_queue_size, counter) }
+  subject(:evictor) { described_class.new(ttl, counter, queue) }
 
   after do
     evictor.teardown
