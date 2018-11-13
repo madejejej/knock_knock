@@ -1,5 +1,7 @@
 module KnockKnock
   class Client
+    attr_reader :counter, :evictor
+
     def initialize(counter, evictor)
       @counter = counter
       @evictor = evictor
@@ -26,9 +28,5 @@ module KnockKnock
     def teardown
       evictor.teardown
     end
-
-    private
-
-    attr_reader :counter, :evictor
   end
 end

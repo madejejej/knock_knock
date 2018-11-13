@@ -20,24 +20,46 @@ module KnockKnock
   # prevents against DoS.
   setting :max_queue_size, 1_000_000
 
+  # If set to false, will assume that requests don't come in increasing order of timestamps.
+  # Will use a Priority-Queue based algorithm that may be more CPU-intensive.
+  setting :ordered_timestamps, true
+
   setting :logger, Logger.new($stdout)
 
-  # Factory method that returns a KnockKnock::Client
-  # It returns a new instance every time.
-  # TODO: configurable Counter and Evictor
-  def self.create_client
-    counter = KnockKnock::Counter::InMemory.new(KnockKnock.config.max_requests)
 
-    evictor = KnockKnock::Evictor::InMemory.new(
-      KnockKnock.config.time_range,
-      KnockKnock.config.max_queue_size,
-      counter,
-    )
+  class << self
+    # Factory method that returns a KnockKnock::Client
+    # It returns a new instance every time.
+    # TODO: configurable Counter and Evictor
+    def create_client
+      counter = KnockKnock::Counter::InMemory.new(config.max_requests)
 
-    KnockKnock::Client.new(counter, evictor)
-  end
+      evictor = create_evictor(counter)
 
-  def self.logger
-    config.logger
+      KnockKnock::Client.new(counter, evictor)
+    end
+
+    def logger
+      config.logger
+    end
+
+    private
+
+    def create_evictor(counter)
+      if config.ordered_timestamps
+        KnockKnock::Evictor::InMemory.new(
+          config.time_range,
+          config.max_queue_size,
+          counter
+        )
+      else
+        KnockKnock::Evictor::InMemoryPriority.new(
+          config.time_range,
+          config.max_queue_size,
+          counter
+        )
+      end
+    end
   end
 end
+
