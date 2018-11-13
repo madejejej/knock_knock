@@ -34,7 +34,7 @@ module KnockKnock
       def size
         # TODO: we could allow multiple readers
         lock.synchronize do
-          queue.size
+          queue.length
         end
       end
 

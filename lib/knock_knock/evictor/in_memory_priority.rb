@@ -36,7 +36,7 @@ module KnockKnock
       # Thread A might first check that the queue is not full, but in the meantime other threads
       # could make it full. Then, Thread A would block.
       def overloaded?
-        queue.size / queue.max > QUEUE_OVERLOAD_FRACTION
+        queue.size / max_queue_size > QUEUE_OVERLOAD_FRACTION
       end
 
       private
