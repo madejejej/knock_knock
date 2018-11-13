@@ -17,8 +17,8 @@ module KnockKnock
       # The queue can get full when there are a lot of requests or the TTL are long.
       # Client should be aware of it and depending on the use-case, block the thread,
       # or don't push into the queue.
-      def mark!(ip, time)
-        queue << [ip, time + ttl]
+      def mark!(request_metadata)
+        queue << request_metadata
       end
 
       # Stops the running evicting thread.
@@ -43,7 +43,10 @@ module KnockKnock
       def start_evicting_thread
         Thread.new do
           while true
-            ip, evict_at = queue.pop
+            request_metadata = queue.pop
+
+            evict_at = [request_metadata.timestamp + ttl, Time.now].max
+            ip = request_metadata.ip
 
             while evict_at > Time.now
               sleep_for = evict_at - Time.now

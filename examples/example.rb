@@ -4,7 +4,7 @@ def create_thread(client, requests_per_second, seconds_alive, ip)
   Thread.new do
     seconds_alive.times do
       requests_per_second.times do
-        client.allow?(ip)
+        client.allow?(KnockKnock::RequestMetadata.new(ip, Time.now))
       end
 
       sleep 1

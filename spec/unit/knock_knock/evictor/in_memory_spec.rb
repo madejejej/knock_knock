@@ -13,6 +13,7 @@ RSpec.describe KnockKnock::Evictor::InMemory do
   describe '#mark!' do
     let(:now) { Time.parse('2018-08-08 15:00:00') }
     let(:ip) { '52.44.12.123' }
+    let(:request_metadata) { KnockKnock::RequestMetadata.new(ip, now) }
     let(:ip2) { '52.88.12.123' }
     let(:ip3) { '44.12.122.58' }
 
@@ -21,7 +22,7 @@ RSpec.describe KnockKnock::Evictor::InMemory do
 
       Timecop.freeze(now)
 
-      subject.mark!(ip, now)
+      subject.mark!(request_metadata)
 
       sleep 0.2
     end
@@ -29,7 +30,7 @@ RSpec.describe KnockKnock::Evictor::InMemory do
     it 'decrements the counter after TTL' do
       Timecop.freeze(now)
 
-      subject.mark!(ip, now)
+      subject.mark!(request_metadata)
 
       sleep 0.2
 
@@ -44,9 +45,9 @@ RSpec.describe KnockKnock::Evictor::InMemory do
     it 'works in a loop' do
       Timecop.freeze(now)
 
-      subject.mark!(ip, now)
-      subject.mark!(ip2, now + 5)
-      subject.mark!(ip3, now + 10)
+      subject.mark!(request_metadata)
+      subject.mark!(KnockKnock::RequestMetadata.new(ip2, now + 5))
+      subject.mark!(KnockKnock::RequestMetadata.new(ip3, now + 10))
 
       sleep 0.2
 

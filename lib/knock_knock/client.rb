@@ -5,19 +5,19 @@ module KnockKnock
       @evictor = evictor
     end
 
-    def allow?(ip)
+    def allow?(request_metadata)
       below_limit = if evictor.overloaded?
-                      counter.below_limit?(ip)
+                      counter.below_limit?(request_metadata.ip)
                     else
-                      below = counter.put_if_below_limit(ip)
+                      below = counter.put_if_below_limit(request_metadata.ip)
 
-                      evictor.mark!(ip, Time.now) if below
+                      evictor.mark!(request_metadata) if below
 
                       below
                     end
 
-      KnockKnock.logger.debug("#{ip} below limit?: #{below_limit}")
-      KnockKnock.logger.info("#{ip} blocked") if !below_limit
+      KnockKnock.logger.debug("#{request_metadata.ip} below limit?: #{below_limit}")
+      KnockKnock.logger.info("#{request_metadata.ip} blocked") if !below_limit
 
       below_limit
     end

@@ -7,8 +7,9 @@ RSpec.describe KnockKnock::Client do
   describe '#allow?' do
     let(:ip) { '45.82.21.35' }
     let(:now) { Time.parse('2018-08-08 15:00') }
+    let(:request_metadata) { KnockKnock::RequestMetadata.new(ip, now) }
 
-    subject { client.allow?(ip) }
+    subject { client.allow?(request_metadata) }
 
     context 'when the evictor is not overloaded' do
       before do
@@ -18,7 +19,7 @@ RSpec.describe KnockKnock::Client do
       context 'when the client didnt exceed the limit' do
         it 'returns true' do
           expect(counter).to receive(:put_if_below_limit).with(ip).and_return true
-          expect(evictor).to receive(:mark!).with(ip, now)
+          expect(evictor).to receive(:mark!).with(request_metadata)
 
           Timecop.freeze(now) do
             expect(subject).to eq true
