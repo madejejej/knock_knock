@@ -15,6 +15,8 @@ end
 KnockKnock.configure do |config|
   config.max_requests = 100
   config.time_range = 10
+  # SWAP `ordered_timestamps` to false to use Priority Evictor
+  config.ordered_timestamps = true
   config.logger = Logger.new($stdout, level: Logger::Severity::INFO)
 end
 
