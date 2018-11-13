@@ -1,9 +1,9 @@
-RSpec.describe KnockKnock::Evictor::InMemory do
+RSpec.describe KnockKnock::Evictor::InMemoryPriority do
   let(:ttl) { 2 }
   let(:counter) { instance_double(KnockKnock::Counter::InMemory) }
-  let(:queue) { KnockKnock::Queue::ThreadSafeQueue.new(max_size: 100) }
+  let(:max_queue_size) { 100 }
 
-  subject(:evictor) { described_class.new(ttl, counter, queue) }
+  subject(:evictor) { described_class.new(ttl, max_queue_size, counter) }
 
   after do
     evictor.teardown
@@ -42,29 +42,32 @@ RSpec.describe KnockKnock::Evictor::InMemory do
       sleep 0.3 # allow some time for the thread to work
     end
 
-    it 'works in a loop' do
+    it 'is able to decrement counters even if the requests arent ordered' do
       Timecop.freeze(now)
 
-      subject.mark!(request_metadata)
       subject.mark!(KnockKnock::RequestMetadata.new(ip2, now + 5))
+      sleep 0.1
       subject.mark!(KnockKnock::RequestMetadata.new(ip3, now + 10))
+      sleep 0.1
+      subject.mark!(request_metadata)
 
       sleep 0.2
 
-      expect(counter).to receive(:decrement).with(ip)
+      expect(counter).to receive(:decrement).with(ip).ordered
 
       Timecop.travel(now + ttl)
+
       subject.evicting_thread.run
 
       sleep 0.3
 
-      expect(counter).to receive(:decrement).with(ip2)
+      expect(counter).to receive(:decrement).with(ip2).ordered
       Timecop.travel(now + 5 + ttl)
       subject.evicting_thread.run
 
       sleep 0.3
 
-      expect(counter).to receive(:decrement).with(ip3)
+      expect(counter).to receive(:decrement).with(ip3).ordered
       Timecop.travel(now + 10 + ttl)
       subject.evicting_thread.run
 
